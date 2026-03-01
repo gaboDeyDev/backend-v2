@@ -1,0 +1,650 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows","darwin-arm64"]
+  // output   = "../generated/prisma" // Usar el path estándar
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model account {
+  id                                            Int                   @id @default(autoincrement())
+  user_id                                       Int
+  account_holder                                String
+  account_type_id                               Int
+  account_number                                String
+  document_type_id                              Int?
+  document_number                               String?
+  bank                                          Int
+  date_created                                  DateTime?             @default(now()) @db.Timestamp(6)
+  is_main_account                               Boolean?              @default(false)
+  is_activate                                   Boolean?              @default(true)
+  list_item_account_account_type_idTolist_item  list_item             @relation("account_account_type_idTolist_item", fields: [account_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "account_account_type_id_list_item_id_fk")
+  list_item_account_bankTolist_item             list_item             @relation("account_bankTolist_item", fields: [bank], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "account_bank_list_item_id_fk")
+  list_item_account_document_type_idTolist_item list_item?            @relation("account_document_type_idTolist_item", fields: [document_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "account_document_type_id_list_item_id_fk")
+  transactions_detail                           transactions_detail[]
+}
+
+model admin {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(70)
+  last_name      String    @db.VarChar(70)
+  email          String    @unique(map: "admin_email_unique") @db.VarChar(70)
+  charge         String
+  role           String
+  cognito_id     String    @unique(map: "admin_cognito_id_unique") @db.VarChar
+  email_verified Boolean?  @default(false)
+  date_created   DateTime? @default(now()) @db.Timestamp(6)
+  active         Boolean?  @default(true)
+  password      String    @db.VarChar(255)
+}
+
+model commission {
+  id                 Int       @id @default(autoincrement())
+  card_usage         Decimal   @db.Decimal
+  bank_transference  Decimal   @db.Decimal
+  cashier_withdrawal Decimal   @db.Decimal
+  marketplace_usage  Decimal   @db.Decimal
+  date_created       DateTime? @default(now()) @db.Timestamp(6)
+  CAT                Decimal   @db.Decimal
+  rate               Decimal   @db.Decimal
+}
+
+model commission_history {
+  id                 Int       @id @default(autoincrement())
+  card_usage         Decimal   @db.Decimal
+  bank_transference  Decimal   @db.Decimal
+  cashier_withdrawal Decimal   @db.Decimal
+  marketplace_usage  Decimal   @db.Decimal
+  date_created       DateTime  @db.Timestamp(6)
+  valid_until        DateTime? @default(now()) @db.Timestamp(6)
+  CAT                Decimal   @db.Decimal
+  rate               Decimal   @db.Decimal
+}
+
+model contract_variable {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value String
+  type  String
+}
+
+model credit {
+  id                String              @unique(map: "unique_credit_id") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_type      String
+  user_id           Int
+  amount            Decimal?            @db.Decimal
+  assignation_date  String?
+  cutoff_date       String?
+  daily_amount      Decimal?            @db.Decimal
+  credit_status     String?
+  credit_cycle      credit_cycle[]
+  credit_increases  credit_increases?
+  payment_extension payment_extension[]
+}
+
+model credit_assignment_variables {
+  id                                   Int      @id @default(autoincrement())
+  min_age                              Decimal  @db.Decimal
+  max_age                              Decimal  @db.Decimal
+  max_score_bad                        Decimal  @db.Decimal
+  max_score_regular                    Decimal  @db.Decimal
+  max_score_good                       Decimal  @db.Decimal
+  max_score_excellent                  Decimal  @db.Decimal
+  max_active_credits                   Decimal? @db.Decimal
+  max_expired_payments                 Decimal  @db.Decimal
+  min_work_months                      Decimal  @db.Decimal
+  min_monthly_earnings                 Decimal  @db.Decimal
+  microcredit                          Decimal  @db.Decimal
+  initial_on_demand_salary             Decimal  @db.Decimal
+  active_payments_bad                  Decimal  @db.Decimal
+  active_payments_regular              Decimal  @db.Decimal
+  active_payments_good                 Decimal  @db.Decimal
+  active_payments_excellent            Decimal  @db.Decimal
+  is_bad_active_payments_allowed       Boolean
+  is_regular_active_payments_allowed   Boolean
+  is_good_active_payments_allowed      Boolean
+  is_excellent_active_payments_allowed Boolean
+}
+
+
+model users_info_card {
+  id    Int    @id @default(autoincrement())
+  email String  @db.VarChar(255)
+  card  String  @db.VarChar(255)
+  month String  @db.VarChar(255)
+  year  String  @db.VarChar(255)
+}
+
+model credit_circle_audit {
+  id                   Int       @id @default(autoincrement())
+  folio                String
+  query_type           String?   @default("PF")
+  client_name          String
+  user                 String
+  rfc                  String
+  address              String
+  city                 String
+  state                String
+  entry_pin_again      String?   @default("Si")
+  legend_authorization String?   @default("Si")
+  tems_and_conditions  String?   @default("Si")
+  date_approved        DateTime  @db.Timestamp(6)
+  date_searched        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model credit_cycle {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  credit_id   String?       @db.Uuid
+  cycle       Int?
+  start_date  String?
+  end_date    String?
+  status      String?
+  credit      credit?       @relation(fields: [credit_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requests    requests[]
+  transaction transaction[]
+}
+
+model credit_increases {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creditId        String    @unique(map: "unique_creditId") @db.Uuid
+  dateCreated     DateTime? @default(now()) @db.Timestamp(6)
+  increasedAmount Decimal   @db.Decimal
+  credit          credit    @relation(fields: [creditId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "credit_increases_creditId_credit_id_fk")
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model creditdata {
+// }
+
+model customer_information {
+  id                  String @id
+  account_external_id String
+  cards               Json
+}
+
+model data_validation_result {
+  id         Int    @id @default(autoincrement())
+  process_id String
+  email_user String
+}
+
+model giftcards_undostres {
+  id             Int       @id @default(autoincrement())
+  transaction_id String    @db.VarChar
+  user_id        Int
+  pin            String    @db.VarChar
+  body           String?
+  date_created   DateTime? @default(now()) @db.Timestamp(6)
+  code           String?   @db.VarChar
+}
+
+model list_item {
+  id                                          Int            @id @default(autoincrement())
+  name                                        String
+  display_name                                String
+  description                                 String
+  code                                        String
+  enabled                                     Boolean?       @default(true)
+  parent_catalogue_id                         Int?
+  catalog_type_id                             Int
+  date_created                                DateTime?      @default(now()) @db.Timestamp(6)
+  regex                                       String?
+  additional_description                      String?
+  is_billable                                 Boolean?       @default(false)
+  account_account_account_type_idTolist_item  account[]      @relation("account_account_type_idTolist_item")
+  account_account_bankTolist_item             account[]      @relation("account_bankTolist_item")
+  account_account_document_type_idTolist_item account[]      @relation("account_document_type_idTolist_item")
+  list_item_type                              list_item_type @relation(fields: [catalog_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "list_item_catalog_type_id_list_item_type_id_fk")
+  list_item                                   list_item?     @relation("list_itemTolist_item", fields: [parent_catalogue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "list_item_parent_catalogue_id_list_item_id_fk")
+  other_list_item                             list_item[]    @relation("list_itemTolist_item")
+  transaction                                 transaction[]
+}
+
+model list_item_type {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  description          String
+  code                 String
+  enabled              Boolean?               @default(true)
+  date_created         DateTime?              @default(now()) @db.Timestamp(6)
+  list_item            list_item[]
+  undostres_categories undostres_categories[]
+  undostres_items      undostres_items[]
+}
+
+model logs {
+  id           Int      @id @default(autoincrement())
+  ip           String   @db.VarChar
+  path         String   @db.VarChar
+  user_agent   String?  @db.VarChar
+  user         String   @db.VarChar
+  request      Json     @db.Json
+  request_type String?  @db.VarChar
+  status       Int
+  response     Json     @db.Json
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+}
+
+model movietickets_undostres {
+  id               Int       @id @default(autoincrement())
+  transaction_id   String    @db.VarChar
+  user_id          Int
+  authorization_id String    @db.VarChar
+  expiration_date  DateTime  @db.Timestamp(6)
+  activation_code  String    @db.VarChar
+  body             String?
+  date_created     DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model payment_extension {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  credit_id          String    @db.Uuid
+  cycle_debt         Float
+  date_created       DateTime? @default(now()) @db.Timestamp(6)
+  extension_deadline DateTime  @db.Timestamp(6)
+  is_active          Boolean   @default(true)
+  credit             credit    @relation(fields: [credit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payment_extension_credit_id_credit_id_fk")
+}
+
+model payment_services {
+  id              Int             @id @default(autoincrement())
+  service_type    String
+  company         String
+  reference       String
+  custom_name     String
+  date_created    DateTime?       @default(now()) @db.Timestamp(6)
+  code            String
+  user_id         Int
+  date_deleted    DateTime?       @db.Timestamp(6)
+  list_item_id    Int
+  undostres_items undostres_items @relation(fields: [list_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payment_services_list_item_id_undostres_items_id_fk")
+  user            user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payment_services_user_id_user_id_fk")
+}
+
+model phone_recharges {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  operator             String
+  phone_number         String
+  created_at           DateTime?             @default(now()) @db.Timestamp(6)
+  code                 String
+  user_id              Int
+  deleted_at           DateTime?             @db.Timestamp(6)
+  list_item_id         Int?
+  undostres_categories undostres_categories? @relation(fields: [list_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "phone_recharges_list_item_id_undostres_categories_id_fk")
+  user                 user                  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "phone_recharges_user_id_user_id_fk")
+}
+
+model platform_settings {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  value       String
+}
+
+model providers {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  date_created DateTime      @default(now()) @db.Timestamp(6)
+  transaction  transaction[]
+}
+
+model references {
+  date_created   String
+  type_operation String
+  amount         String
+  status         String
+  user_id        Int
+  date_update    String?
+  id             String        @id(map: "pk_references") @unique(map: "unique_reference_id") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reference      String
+  user           user          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transaction    transaction[]
+}
+
+model requests {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          Int
+  cycle_id         String       @db.Uuid
+  cycle_debt       Float
+  commission_value Decimal      @db.Decimal
+  total_amount_pay Float
+  date_created     DateTime?    @default(now()) @db.Timestamp(6)
+  status           String
+  credit_cycle     credit_cycle @relation(fields: [cycle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "requests_cycle_id_credit_cycle_id_fk")
+  user             user         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "requests_physic_card_user_id_user_id_fk")
+}
+
+model requests_physic_card {
+  id           Int       @id @default(autoincrement())
+  user_id      Int       @default(autoincrement())
+  status       String
+  date_created DateTime? @default(now()) @db.Timestamp(6)
+  user         user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_fk")
+}
+
+model return_catalogue {
+  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  catalogue_code String
+  name           String
+  description    String
+}
+
+model signing_result {
+  id             Int       @id @default(autoincrement())
+  email          String
+  object         String
+  date_created   DateTime? @default(now()) @db.Timestamp(6)
+  contract_token String
+  event_type     String
+}
+
+model stp_clabe {
+  id      Int    @id @default(autoincrement())
+  clabe   String @unique(map: "stp_clabe_clabe_unique")
+  user_id Int    @unique(map: "stp_clabe_user_id_unique") @default(autoincrement())
+  user    user   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_fk")
+}
+
+model system_parameters {
+  id          Int    @id(map: "system_parameter_pkey") @default(autoincrement())
+  placeholder String
+  value       String
+}
+
+model tags {
+  id              Int             @id @default(autoincrement())
+  company         String
+  tag_number      String
+  custom_name     String
+  created_at      DateTime?       @default(now()) @db.Timestamp(6)
+  code            String
+  user_id         Int
+  deleted_at      DateTime?       @db.Timestamp(6)
+  list_item_id    Int
+  undostres_items undostres_items @relation(fields: [list_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tags_list_item_id_undostres_items_id_fk")
+  user            user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tags_user_id_user_id_fk")
+}
+
+model temp_codes {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique(map: "temp_codes_code_unique")
+  email      String
+  type       String
+  expiration DateTime @db.Timestamp(6)
+  is_verify  Int?
+}
+
+model transaction {
+  id                         String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  amount                     Decimal                      @db.Decimal
+  commission_value           Decimal?                     @db.Decimal
+  commission_use             Decimal?                     @db.Decimal
+  iva_value                  Decimal                      @db.Decimal
+  status                     Int
+  entity                     Int?
+  details                    String
+  date_created               DateTime?                    @default(now()) @db.Timestamp(6)
+  cycle_id                   String?                      @db.Uuid
+  balance                    Decimal                      @db.Decimal
+  debt                       Decimal                      @db.Decimal
+  reference                  String?                      @db.Uuid
+  user_id                    Int
+  transaction_commission_id  Int?
+  provider_id                String?                      @db.Uuid
+  date_updated               DateTime?                    @default(now()) @db.Timestamp(6)
+  mo_export                  Boolean                      @default(false)
+  credit_cycle               credit_cycle?                @relation(fields: [cycle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_cycle_id_credit_cycle_id_fk")
+  list_item                  list_item?                   @relation(fields: [entity], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_entity_list_item_id_fk")
+  providers                  providers?                   @relation(fields: [provider_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_provider_id_providers_id_fk")
+  references                 references?                  @relation(fields: [reference], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_reference_references_id_fk")
+  transaction_state          transaction_state            @relation(fields: [status], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_status_transaction_state_id_fk")
+  transaction_commission     transaction_commission?      @relation(fields: [transaction_commission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_transaction_commission_id_transaction_commission_id")
+  user                       user                         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_user_id_user_id_fk")
+  transaction_status_history transaction_status_history[]
+  transactions_detail        transactions_detail[]
+}
+
+model transaction_commission {
+  id                       Int                   @id
+  transaction_type_id      Int
+  transaction_operation_id Int
+  commission_value         Decimal               @db.Decimal
+  is_absolute              Boolean
+  iva                      Decimal               @db.Decimal
+  date_updated             DateTime?             @default(now()) @db.Timestamp(6)
+  date_created             DateTime?             @default(now()) @db.Timestamp(6)
+  transaction              transaction[]
+  transaction_operation    transaction_operation @relation(fields: [transaction_operation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_commission_transaction_operation_id_transaction_ope")
+  transaction_type         transaction_type      @relation(fields: [transaction_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_commission_transaction_type_id_transaction_type_id_")
+}
+
+model transaction_operation {
+  id                          Int                      @id
+  name                        String
+  parent_id                   Int?
+  date_created                DateTime?                @default(now()) @db.Timestamp(6)
+  code                        String
+  transaction_commission      transaction_commission[]
+  transaction_operation       transaction_operation?   @relation("transaction_operationTotransaction_operation", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_operation_parent_id_transaction_operation_id_fk")
+  other_transaction_operation transaction_operation[]  @relation("transaction_operationTotransaction_operation")
+}
+
+model transaction_state {
+  id           Int           @id @default(autoincrement())
+  state        String
+  date_created DateTime?     @default(now()) @db.Timestamp(6)
+  transaction  transaction[]
+}
+
+model transaction_status_history {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transaction_id String      @db.Uuid
+  status         Int
+  status_data    String?
+  date_created   DateTime    @default(now()) @db.Timestamp(6)
+  transaction    transaction @relation(fields: [transaction_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_status_history_transaction_id_transaction_id_fk")
+}
+
+model transaction_type {
+  id                     Int                      @id @default(autoincrement())
+  date_created           DateTime?                @default(now()) @db.Timestamp(6)
+  name                   String
+  transaction_commission transaction_commission[]
+}
+
+model transactions_detail {
+  id                       String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transaction_id           String      @db.Uuid
+  stp_transaction_id       String?
+  authorization_code       String?
+  folio                    String?
+  expiration_date          DateTime?   @db.Timestamp(6)
+  operation_code           String?
+  card_number              String?
+  activation_pin           String?
+  date_created             DateTime    @default(now()) @db.Timestamp(6)
+  account_id               Int?
+  undostres_transaction_id String?
+  clave_rastreo            String?
+  account                  account?    @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_detail_account_id_account_id_fk")
+  transaction              transaction @relation(fields: [transaction_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_detail_transaction_id_transaction_id_fk")
+}
+
+model truora_attempts {
+  id           Int    @id @default(autoincrement())
+  attempt      Int?
+  sign_url     String
+  last_updated String @default(dbgenerated("CURRENT_TIMESTAMP"))
+  email        String
+}
+
+model undostres_categories {
+  id                         Int                    @id @default(autoincrement())
+  name                       String
+  description                String
+  enabled                    Boolean?               @default(true)
+  list_item_type_id          Int?
+  parent_category_id         Int?
+  phone_recharges            phone_recharges[]
+  list_item_type             list_item_type?        @relation(fields: [list_item_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "list_item_type_fk")
+  undostres_categories       undostres_categories?  @relation("undostres_categoriesToundostres_categories", fields: [parent_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "undostres_categories_parent_category_id_undostres_categories_id")
+  other_undostres_categories undostres_categories[] @relation("undostres_categoriesToundostres_categories")
+  undostres_items            undostres_items[]
+}
+
+model undostres_items {
+  id                   Int                   @id @default(autoincrement())
+  category_id          Int?
+  list_item_type_id    Int?
+  name                 String
+  display_name         String
+  description          String
+  code_prod            String                @unique(map: "undostres_items_code_prod_unique")
+  code_dev             String?               @unique(map: "undostres_items_code_dev_unique")
+  enabled              Boolean?              @default(true)
+  regex                String?
+  is_billable          Boolean?              @default(false)
+  payment_services     payment_services[]
+  tags                 tags[]
+  undostres_categories undostres_categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "category_fk")
+  list_item_type       list_item_type?       @relation(fields: [list_item_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "list_item_type_fk")
+}
+
+model user {
+  id                         Int                    @id @default(autoincrement())
+  name                       String                 @db.VarChar(70)
+  email                      String                 @unique(map: "user_email_unique") @db.VarChar(70)
+  phone                      String?
+  salary                     Decimal?               @db.Decimal
+  salary_type                String?
+  insurance                  String?
+  cognito_id                 String                 @unique(map: "user_cognito_id_unique") @db.VarChar
+  email_verified             Boolean?               @default(false)
+  phone_verified             Boolean?               @default(false)
+  date_created               DateTime?              @default(now()) @db.Timestamp(6)
+  is_active                  Boolean                @default(true)
+  date_created_delete        DateTime?              @db.Timestamp(6)
+  accepts_advertising        Boolean?               @default(false)
+  accepts_account_statements Boolean?               @default(false)
+  type_product               String?                @db.VarChar(50)
+  type_sub_product           Int?
+  payment_services           payment_services[]
+  phone_recharges            phone_recharges[]
+  references                 references[]
+  requests                   requests[]
+  requests_physic_card       requests_physic_card[]
+  stp_clabe                  stp_clabe?
+  tags                       tags[]
+  transaction                transaction[]
+  user_publicity             user_publicity?
+  pomelo_user_id   String? @db.VarChar
+  virtual_card_id  String? @db.VarChar
+  sod_id           String? @db.VarChar
+  physical_card_id String? @db.VarChar
+  profile_image              Bytes?
+  token_cobranza             String?
+  accepts_tc_provacity       Boolean?
+  accepts_publicity          Boolean?
+}
+
+model account_states {
+  id         Int      @id @default(autoincrement())
+  email      String   @db.VarChar(255)
+  name       String   @db.Text
+  link       String   @db.Text
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model user_cards {
+  id               Int    @id @default(autoincrement())
+  user_id          Int
+  card_external_id String @db.VarChar(255)
+  date_created     String @default(dbgenerated("CURRENT_TIMESTAMP"))
+  type             String @db.VarChar(255)
+}
+
+model user_publicity {
+  id              Int    @id @default(autoincrement())
+  user_id         Int    @unique(map: "user_publicity_user_id_unique") @default(autoincrement())
+  acceptance_date String @default(dbgenerated("CURRENT_TIMESTAMP"))
+  user            user   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_fk")
+}
+
+model validation_result {
+  id           Int       @id @default(autoincrement())
+  data         String
+  date_created DateTime? @default(now()) @db.Timestamp(6)
+  process_id   String
+  event_action String
+}
+
+model verified_user {
+  id                              Int      @id @default(autoincrement())
+  names                           String   @db.VarChar(255)
+  lastname                        String   @db.VarChar(255)
+  birth_date                      DateTime @db.Date
+  gender                          String   @db.VarChar
+  birth_state                     String   @db.VarChar(255)
+  nationality                     String?  @db.VarChar(255)
+  curp                            String   @db.VarChar(18)
+  rfc                             String   @db.VarChar(13)
+  email                           String   @db.VarChar(255)
+  phone                           String
+  residence_country               String   @db.VarChar(255)
+  residence_state                 String   @db.VarChar(255)
+  address                         String?
+  kyc_data                        String?
+  date_created                    String?  @default(dbgenerated("CURRENT_TIMESTAMP"))
+  circle_credit_data              String?
+  eva_data                        String?
+  kyc_data_last_checked           String?
+  circle_credit_data_last_checked String?
+  eva_data_last_checked           String?
+  credit                          String?
+  neighborhood                    String?  @db.VarChar(255)
+  postalCode                      String?  @db.VarChar(255)
+  dataAgreement                   Boolean?
+  termsAgreement                  Boolean?
+  identitynumber                  String?  @db.VarChar(50)
+  identitytype                    String?  @db.VarChar(50)
+  legal_street_name               String?  @db.VarChar(255)
+  legal_street_number             String?  @db.VarChar(20)
+  legal_floor                     String?  @db.VarChar(10)
+  legal_apartment                 String?  @db.VarChar(10)
+  legal_zip_code                  String?  @db.VarChar(10)
+  legal_neighborhood              String?  @db.VarChar(100)
+  legal_city                      String?  @db.VarChar(100)
+  legal_region                    String?  @db.VarChar(100)
+  legal_municipality              String?  @db.VarChar(100)
+  legal_additional_info           String?
+  mothers_lastname                String?  @db.VarChar
+  fathers_lastname                String?  @db.VarChar
+  password                        String?
+  is_new                          Boolean?
+}
+
+model webhook_logs {
+  id            Int       @id @default(autoincrement())
+  body_request  String
+  register_date DateTime? @default(now()) @db.Timestamp(6)
+  type_log      String
+}
+model empleados {
+  id               Int      @id @default(autoincrement())
+  nombre           String   @db.VarChar(100)
+  apellido_paterno String   @db.VarChar(100)
+  apellido_materno String?  @db.VarChar(100)
+  correo           String   @unique @db.VarChar(150)
+  curp             String   @unique @db.Char(18)
+  rfc              String   @unique @db.Char(13)
+  fecha_nacimiento DateTime @db.Date
+  sueldo           Decimal  @db.Decimal(12,2)
+  periodicidad     String   @db.VarChar(50)
+  creado_en        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+

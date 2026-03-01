@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows","darwin-arm64"]
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("UNDOSTRES_DATABASE_URL")
+}
+
+model Categories {
+    id          Int       @id @default(autoincrement())
+    name        String    @unique
+    updateAt   DateTime  @updatedAt
+    createdAt  DateTime  @default(now())
+
+    Provider Provider[]
+}
+
+model Provider {
+    id          Int       @id @default(autoincrement())
+    name        String    @unique
+    categoryID  Int
+    updateAt    DateTime  @updatedAt
+    createdAt   DateTime  @default(now())
+
+    category    Categories @relation(fields: [categoryID], references: [id])
+
+    Product Product[]
+}
+
+model Product {
+    id                      Int       @id @default(autoincrement())
+    skuid                   Int       @unique
+    name                    String?
+    price                   Decimal
+    description             String?
+    facturable              Boolean   @default(false)
+    validateLength          String?
+    fetchAmount             Boolean   @default(false)
+    maxAmount               Decimal?
+    minAmount               Decimal?
+    paymentReferenceType    ReferenceType @default(NUMERO_TELEFONO)
+    acceptPartialPayment    Boolean   @default(false)
+    extraFields             String?
+    cardType                CardType  @default(STATIC)
+
+    providerId              Int
+    updateAt                DateTime  @updatedAt
+    createdAt               DateTime  @default(now())
+
+    @@index([providerId], name: "idx_provider")
+
+    provider                Provider @relation(fields: [providerId], references: [id])
+}
+
+enum ReferenceType {
+    CODIGA_BARRAS
+    REFERENCIA_PAGO
+    NUMERO_SERVICIO
+    NUMERO_CUENTA
+    NUMERO_CONTRATO
+    NUMERO_USUARIO
+    NUMERO_TELEFONO
+    NUMERO_TAG
+    NUMERO_CLIENTE
+    NUMERO_REFERENCIA
+}
+
+enum CardType {
+  STATIC
+  DYNAMIC
+}
+

@@ -1,0 +1,1 @@
+export type VerificationProviderType = 'KYC' | 'TRUORA' | 'CIRCLE_CREDIT';

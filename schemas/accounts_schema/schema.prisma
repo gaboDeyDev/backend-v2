@@ -1,0 +1,298 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/accounts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("ACCOUNT_DATABASE_URL")
+}
+
+
+model Account {
+    id                  String @id @default(uuid())
+    email               String @unique
+    password            String?
+    status              AccountStatustype @default(IN_PROGRESS)
+    //emailVerfication    Boolean     @default(false)
+    //phoneVerification   Boolean?    @default(false)
+    active              Boolean     @default(false)
+    processID           String? @unique
+
+    createdAt           DateTime    @default(now())
+    updatedAt           DateTime    @updatedAt
+
+    customer            Customer?
+    admin               Admin?
+    codes               Codes[]
+    sessions            Session[]
+
+    onboarding          RegistrationProcedure? @relation(fields: [processID], references: [id])
+
+    @@map("t_accounts")
+}
+
+model Customer {
+    id                  String @id @default(uuid())
+    names               String
+    familyName          String
+    lastName            String
+    birthDate           String
+    gender              GenderType
+    birthState          String
+    nationality         String
+    residenceCountry    String
+    residenceState      String
+    person              PersonType @default(PHYSICAL)
+    //type                CustomerType
+    maritalStatus       String?
+    accountID           String?  @unique
+    pomeloUserID        String?  @unique @map("pomelo_user_id")
+
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+
+    account             Account? @relation(fields: [accountID], references: [id])
+
+    data                SensitiveData[]
+    verifications       Verification[]
+    employment          Employment?
+
+    @@map("t_customers")
+    
+}
+
+model Admin {
+    id              String @id @default(uuid())
+    name            String
+    lastName        String
+    //email           String
+    charge          ChargesType @default(AUXILIAR)
+    role            Rolestype
+    accountID       String @unique
+
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    account         Account @relation(fields: [accountID], references: [id])
+
+    @@map("t_admin")
+}
+
+model SensitiveData {
+    id          String @id @default(uuid())
+    key         SensitiveDataType
+    value       String
+    hash        String
+    //iv          String
+    customerID  String
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    customer    Customer @relation(fields: [customerID], references: [id])
+
+    @@map("t_sensitive_data")
+}
+
+model Verification {
+    id                  String @id @default(uuid())
+    provider            VerificationProviderType
+    status              VerificationStatusType
+    result              String
+    verificationDate    DateTime
+    reference           String?
+    customerID          String
+
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+
+    customer            Customer @relation(fields: [customerID], references: [id])
+
+    @@map("t_user_verifications_results")
+}
+
+model Codes {
+    id          String @id @default(uuid())
+    value       String
+    expiresAt   DateTime
+    used        Boolean @default(false)
+    expired     Boolean @default(false)
+    subject     CodeType
+    attempts    Int @default(0)
+    accountID   String
+    success     Boolean @default(false)
+
+
+    createdAt   DateTime @default(now())
+    UpdatedAt   DateTime @updatedAt
+
+    account     Account @relation(fields: [accountID], references: [id])
+
+    @@map("t_verification_codes")
+}
+
+model Session {
+    @@map("t_sessions")
+    id              String @id @default(uuid())
+    accountID       String @map("account_id")
+    attempts        Int @default(0)
+    active          Boolean @default(true)
+    closed          Boolean @default(false)
+    lastAccess      DateTime @default(now()) @map("last_access")
+    expiresAt       DateTime @map("expires_at")
+    closedReason    ClosedReasonType? @map("closed_reason")
+
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+    account        Account @relation(fields: [accountID], references: [id])
+}
+
+model Company {
+    @@map("t_companies")
+    id             String @id @default(uuid())
+    name           String
+    address        String
+    colony         String
+    city           String
+    state          String
+    zipCode        String @map("zip_code")
+    phone          String?
+
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+    employee       Employment[]
+}
+
+model Employment {
+    @@map("t_employments")
+    id                      String @id @default(uuid())
+    phone                   String?
+    extension               String?
+    fax                     String?
+    position                String?
+    department              String?
+    hiringDay               String @map("hiring_day")
+    currency                String
+    monthlySalary           Float @map("monthly_salary")
+    lastDay                 DateTime? @map("last_day")
+    verificationDay         DateTime? @map("verification_day")
+    originCompanyAddress    String? @map("origin_company_address")
+    salaryFrecuency         SalaryFrecuencyType @map("salary_frecuency")
+    insurance               InsuranceType
+    customerID              String @unique
+    companyID               String
+
+    createdAt               DateTime @default(now()) @map("created_at")
+    updatedAt               DateTime @updatedAt @map("updated_at")
+
+    person                  Customer @relation(fields: [customerID], references: [id])
+    company                 Company @relation(fields: [companyID], references: [id])
+
+}
+
+model RegistrationProcedure {
+    @@map("t_registration_procedures")
+    
+    id                      String @id @default(uuid())
+    acceptTerms             Boolean @default(false) @map("accept_terms")
+    acceptPrivacy           Boolean @default(false) @map("accept_privacy")
+    emailVerification       Boolean @default(false) @map("email_verification")
+    phoneVerification       Boolean @default(false) @map("phone_verification")
+    passwordChanged         Boolean @default(false) @map("password_changed")
+    acceptProduct           Boolean @default(false) @map("accept_product")
+    identityVerification    Boolean @default(false) @map("identity_verification")
+
+    createdAt               DateTime @default(now()) @map("created_at")
+    updatedAt               DateTime @updatedAt @map("updated_at")
+
+    account                 Account?
+}
+
+enum GenderType {
+    MALE
+    FEMALE
+}
+
+enum SensitiveDataType {
+    RFC
+    CURP
+    PHONE
+    SALARY
+    DEVICE_ID
+    ADDRESS
+    NSS
+    DRIVER_LICENSE
+    INE
+    PASSPORT
+}
+
+enum AccountStatustype {
+    ACTIVE
+    IN_PROGRESS
+    BLOCKED
+    DELETED
+}
+
+enum VerificationProviderType {
+    KYC
+    TRUORA
+    CIRCLE_CREDIT
+}
+
+enum VerificationStatusType {
+    APPROVED
+    FAILED
+    IN_PROGRESS
+    PENDING
+    UNDER_REVIEW_COMPLIANCE
+    PENDING_COMPLIANCE_REVIEW
+}
+
+enum SalaryFrecuencyType {
+    WEEKLY
+    MONTHLY
+    BIWEEKLY
+    FOURTEENTH
+}
+
+enum InsuranceType {
+    IMSS
+    ISSSTE
+}
+
+enum ChargesType {
+    AUXILIAR
+}
+
+enum Rolestype {
+    READER
+    WRITER
+}
+
+enum CodeType {
+    EMAIL_VERIFICATION
+    PHONE_VERIFICATION
+    RECOVERY_ACCOUNT
+}
+
+enum ClosedReasonType {
+    LOGOUT
+    TIMEOUT
+    ACCOUNT_DISABLED
+    MAX_ATTEMPTS
+    OTHER
+}
+
+enum PersonType {
+    PHYSICAL
+    LEGAL
+}
+
+enum CustomerType {
+    UNION
+    COMPANY
+    INDIVIDUAL
+}

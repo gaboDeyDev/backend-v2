@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estado de Cuenta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1, h2 { text-align: center; }
+    .cliente-info, .resumen { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { padding: 8px; text-align: left; }
+    .grafica { width: 100%; height: 300px; }
+    .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; }
+    .cliente-info { display: flex; justify-content: space-between; margin-bottom: 10px;  }
+    .info { display: flex; flex-direction: row; justify-content: space-between; width: 400px; }
+    .table-info { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .item-table { width: 100%; height: 100px; background-color: #f0f0f0; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center; }
+    th { background-color: #c8c8c8; color: #5f5e5e; border-radius: 8px; }
+
+  </style>
+  <style>
+  .card {
+    border: 2px solid #757573;
+    border-radius: 10px;
+    margin: 20px 0;
+    width: 48%;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: fit-content;
+  }
+
+  .card-2 {
+    border: 2px solid #757573;
+    border-radius: 10px;
+    margin: 20px 0;
+    margin-top: 10px;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: fit-content;
+  }
+
+  .card-2-no-border {
+    border-radius: 10px;
+    margin: 20px 0;
+    margin-top: 10px;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: fit-content;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 4px;
+    border-bottom: 2px solid #757573;
+  }
+
+  .row:last-child {
+    border-bottom: none;
+  }
+
+  .label {
+    color: #555;
+  }
+
+  .value {
+    font-weight: bold;
+  }
+
+  .dark {
+    background-color: #959595;
+    padding: 8px;
+  }
+
+  .dark-light {
+    background-color: #bbbdc0;
+    padding: 8px;
+  }
+
+  .container-tables {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .container-graph {
+    width: 48%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+</style>
+  <style>
+    .container-graph-v2 {
+      width: 400px;
+      margin-bottom: 20px;
+      padding-right: 200px;
+    }
+
+    .title-graph-v2 {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .row-graph-v2 {
+      display: flex;
+      align-items: center;
+    }
+
+    .label-graph-v2 {
+      width: 140px;
+      background-color: #ccc;
+      padding: 4px 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+      border-bottom: 1px solid #757573;
+      border-top: 1px solid #757573;
+      border-right: 1px solid #757573;
+      border-left:1px solid #757573;
+    }
+
+    .bar-container-graph-v2 {
+      flex-grow: 1;
+      margin: 0 0;
+      height: 24px;
+      position: relative;
+    }
+
+    .bar-graph-v2 {
+      height: 100%;
+      background: linear-gradient(to right, #999, #ddd);
+      border-bottom: 1px solid #757573;
+      border-top: 1px solid #757573;
+      border-right: 1px solid #757573;
+      padding: 0 4px;
+    }
+
+    .amount-graph-v2 {
+      width: 70px;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .money {
+      text-align: right;
+      font-size: 14px;
+      margin: 0 8px;
+    }
+
+    p {
+      text-align: justify;
+    }
+  </style>
+        <style>
+      body, * {
+        font-family: 'Outfit', sans-serif !important;
+      }
+      </style>
+
+</head>
+<body>
+  <div class="header">
+    <div>
+      <img src="https://dey-images.s3.us-east-1.amazonaws.com/dey_logo.png" alt="logo">
+    </div>
+    <div style="text-align: right; display: flex; flex-direction: column; justify-content: flex-start; align-items: start; height: 100%;" >
+      <div>Estado de Cuenta</div>
+      <div>dey crédito</div>
+    </div>
+  </div>
+  <div class="cliente-info">
+    <div>
+      <div><%= cliente.nombre %></div>
+      <div><%= cliente.direccion %></div>
+      <div><%= cliente.colony %></div>
+      <div><%= cliente.munucipality %></div>
+    </div>
+    <div>
+      <div class="info"><span>Número de cliente:</span> <span><%= cliente.numeroCliente %></span></div>
+      <div class="info"><span>R.F.C.:</span> <span><%= cliente.rfc %></span></div>
+      <div class="info"><span>Cuenta clabe:</span> <span><%= cliente.cuentaClabe %></span></div>
+      <div class="info"><span>Número de contrato:</span> <span><%= cliente.numeroContrato %></span></div>
+    </div>
+  </div>
+  <div class="container-tables">
+    <div class="card">
+      <div class="row">
+        <div class="label">Saldo inicial</div>
+        <div class="value"><%= infoTable.saldoInicial %></div>
+      </div>
+      <div class="row">
+        <div class="label">Saldo insoluto**</div>
+        <div class="value"><%= infoTable.saldoInsoluto %></div>
+      </div>
+      <div class="row">
+        <div class="label">Abonos (–)</div>
+        <div class="value"><%= infoTable.abonos %></div>
+      </div>
+      <div class="row">
+        <div class="label">Cargos (+)</div>
+        <div class="value"><%= infoTable.cargos %></div>
+      </div>
+      <div class="row">
+        <div class="label">Saldo final</div>
+        <div class="value"><%= infoTable.saldoFinal %></div>
+      </div>
+      <div class="row">
+        <div class="label">Número total de parcialidades</div>
+        <div class="value">0</div>
+      </div>
+      <div class="row">
+        <div class="label">Número de parcialidad a pagar</div>
+        <div class="value">0/0</div>
+      </div>
+      <div class="row">
+        <div class="label">Pagos anticipados</div>
+        <div class="value"><%= infoTable.pagosAnticipados %></div>
+      </div>
+      <div class="row">
+        <div class="label">Cargos objetados</div>
+        <div class="value"><%= infoTable.cargosObjetados %></div>
+      </div>
+      <div class="row">
+        <div class="label">Número de folio</div>
+        <div class="value"><%= infoTable.folio %></div>
+      </div>
+    </div>
+    <div class="card">
+  <div class="row">
+    <div class="label">Período</div>
+    <div class="value">Del <%= periodo.inicio %> al <%= periodo.fin %></div>
+  </div>
+  <div class="row">
+    <div class="label">Fecha de corte</div>
+    <div class="value"><%= periodo.fechaCorte %></div>
+  </div>
+  <div class="row">
+    <div class="label">Fecha límite de pago*</div>
+    <div class="value"><%= periodo.fechaLimitePago %></div>
+  </div>
+  <div class="row dark">
+    <div class="label">CAT Promedio</div>
+    <div class="value">149.5% + IVA</div>
+  </div>
+  <div class="row dark-light">
+    <div class="label">Tasa fija de interés anual ordinaria</div>
+    <div class="value">95% + IVA anual</div>
+  </div>
+  <div class="row dark-light">
+    <div class="label">Tasa fija de interés anual moratoria</div>
+    <div class="value">0%</div>
+  </div>
+  <div class="row">
+    <div class="label">Intereses efectivamente pagados</div>
+    <div class="value"><%= infoTable.iep %></div>
+  </div>
+  <div class="row">
+    <div class="label">Pago mínimo</div>
+    <div class="value"><%= infoTable.pagoMinimo %></div>
+  </div>
+  <div class="row">
+    <div class="label">Pago mínimo más pago a meses s/intereses</div>
+    <div class="value"><%= infoTable.pagoMinimo %></div>
+  </div>
+  <div class="row">
+    <div class="label">Pago para no generar intereses</div>
+    <div class="value"><%= infoTable.normalPayment %></div>
+  </div>
+  <div class="row">
+    <div class="label">Días del período</div>
+    <div class="value"><%= infoTable.diasPeriodo %></div>
+  </div>
+  <div class="row">
+    <div class="label">Límite de crédito</div>
+    <div class="value"><%= cliente.limiteCredito %></div>
+  </div>
+    </div>
+  </div>
+  <div class="container-tables">
+            <!-- <div><canvas id="graficaResumen" width="600" height="300"></canvas></div> -->
+    <div class="container-graph">
+      <div>Información Financiera</div>
+      <hr style="border: 1px solid #ffb600; margin-top: 10px; width: 100%;">
+    <div class="card-2">
+      <div class="row">Monto a pagar en el período</div>
+      <div class="row">
+        <div class="label">Capital</div>
+        <div class="value"><%= infoTable.capital %></div>
+      </div>
+      <div class="row">
+        <div class="label">Intereses</div>
+        <div class="value"><%= infoTable.intereses %></div>
+      </div>
+      <div class="row">
+        <div class="label">I.V.A.</div>
+        <div class="value"><%= infoTable.iva %></div>
+      </div>
+      <div class="row">
+        <div class="label">Seguro</div>
+        <div class="value"><%= infoTable.seguro %></div>
+      </div>
+      <div class="row">
+        <div class="label">Comisiones por disposición</div>
+        <div class="value"><%= infoTable.comisiones %></div>
+      </div>
+      <div class="row">
+        <div class="label">Total pagado</div>
+        <div class="value"><%= infoTable.totalPagado %></div>
+      </div>
+      <div class="row">
+        <div class="label">Intereses cargados en el período</div>
+        <div class="value"><%= infoTable.iceep %></div>
+      </div>
+      <div class="row">
+        <div class="label">Comisiones de la cuenta</div>
+        <div class="value"><%= infoTable.comisionesCuenta %></div>
+      </div>
+      <div class="row">
+        <div class="label">Comisión por pago tardío</div>
+        <div class="value"><%= infoTable.pagoTardio %></div>
+      </div>
+      <div class="row">
+        <div class="label">Comisión por aclaración improcedente</div>
+        <div class="value"><%= infoTable.cpai %></div>
+      </div>
+
+      <div class="row title">Monto total de las comisiones cobradas</div>
+      <div class="row">
+        <div class="value"><%= infoTable.tptalComisiones %></div>
+      </div>
+    </div>
+    </div>
+    <div class="container-graph">
+      <div>Información Financiera</div>
+      <hr style="border: 1px solid #ffb600;  margin-top: 10px; width: 100%;">
+    <div class="card-2-no-border">
+      <div>
+      <div class="container-graph-v2">
+      <div class="title-graph-v2">(Línea de Crédito <%= cliente.limiteCredito %>)</div>
+      <div class="row-graph-v2">
+        <div class="label-graph-v2">Saldo inicial</div>
+        <div class="money">$</div>
+        <div class="bar-container-graph-v2">
+          <div class="bar-graph-v2" style="width: calc(<%= infoTable.saldoInicialGraph %> / <%= cliente.limiteCreditoGraph %> * 100%)"></div>
+        </div>
+        <div class="amount-graph-v2"><%= infoTable.saldoInicial %></div>
+      </div>
+      <div class="row-graph-v2">
+        <div class="label-graph-v2">Saldo insoluto</div>
+        <div class="money">$</div>
+        <div class="bar-container-graph-v2">
+          <div class="bar-graph-v2" style="width: calc(<%= infoTable.saldoInsolutoGraph %> / <%= cliente.limiteCreditoGraph %> * 100%)"></div>
+        </div>
+        <div class="amount-graph-v2"><%= infoTable.saldoInsoluto%></div>
+      </div>
+        <div class="row-graph-v2">
+          <div class="label-graph-v2">Saldo final</div>
+          <div class="money">$</div>
+          <div class="bar-container-graph-v2">
+            <div class="bar-graph-v2" style="width: calc(<%= infoTable.saldoFinalGraph %> / <%= cliente.limiteCreditoGraph %> * 100%)"></div>
+          </div>
+          <div class="amount-graph-v2"><%= infoTable.saldoFinal %></div>
+        </div>
+
+        <div class="row-graph-v2">
+          <div class="label-graph-v2">Cargos objetados</div>
+          <div class="money">$</div>
+          <div class="bar-container-graph-v2">
+            <div class="bar-graph-v2" style="width: calc(<%= infoTable.cargosObjetadosGraph %> / <%= cliente.limiteCreditoGraph %> * 100%)"></div>
+          </div>
+          <div class="amount-graph-v2"><%= infoTable.cargosObjetados %></div>
+        </div>
+
+        <div class="row-graph-v2">
+          <div class="label-graph-v2">Pagos anticipados</div>
+          <div class="money">$</div>
+          <div class="bar-container-graph-v2">
+            <div class="bar-graph-v2" style="width: calc(<%= infoTable.pagosAnticipadosGraph %> / <%= cliente.limiteCreditoGraph %> * 100%)"></div>
+          </div>
+          <div class="amount-graph-v2"><%= infoTable.pagosAnticipados %></div>
+        </div>
+      </div>
+    </div>
+      <p>De acuerdo a tus instrucciones, el importe de este crédito será pagado
+      por tu empresa vía descuento de nómina. </p>
+     <p> Recuerda que no cobramos intereses por tu disposición solo una
+      comisión fija por evento. </p><br>
+      <p>Disfruta de tu dinero cómo quieras y sin tener que esperar al día 
+      de pago. </p>
+    </div>
+    </div>
+  </div>
+  </div>
+  <hr style="border: 1px solid #ffb600; margin: 2px 0;">
+  <!-- <h1>Estado de Cuenta</h1>
+  <div class="cliente-info">
+    <p><strong>Nombre:</strong> <%= cliente.nombre %></p>
+    <p><strong>Dirección:</strong> <%= cliente.direccion %></p>
+    <p><strong>Número de Cliente:</strong> <%= cliente.numeroCliente %></p>
+    <p><strong>RFC:</strong> <%= cliente.rfc %></p>
+    <p><strong>Cuenta CLABE:</strong> <%= cliente.cuentaClabe %></p>
+    <p><strong>Número de Contrato:</strong> <%= cliente.numeroContrato %></p>
+    <p><strong>Límite de Crédito:</strong> $<%= cliente.limiteCredito %></p>
+    <p><strong>Periodo:</strong> <%= periodo.inicio %> al <%= periodo.fin %></p>
+    <p><strong>Fecha de Corte:</strong> <%= periodo.fechaCorte %></p>
+    <p><strong>Fecha Límite de Pago:</strong> <%= periodo.fechaLimitePago %></p>
+  </div> -->
+
+  <h5>Detalle de Movimientos Realizados</h5>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Concepto</th>
+        <th>Cargo</th>
+        <th>Abono</th>
+        <th>Saldo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% movimientos.forEach(mov => { %>
+        <tr>
+          <td><%= mov.fecha %></td>
+          <td><%= mov.concepto %></td>
+          <td><%= mov.cargo %></td>
+          <td><%= mov.abono %></td>
+          <td><%= mov.saldo %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <div class="movimientos-container-v2" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; font-size: 14px; line-height: 1.6;">
+  <h2 style="font-weight: bold; margin-bottom: 1em;">Total de Movimientos 2</h2>
+
+  <p style="font-weight: bold;">UNIDAD ESPECIALIZADA DE ATENCIÓN A USUARIOS (UNE)</p>
+  <p>
+    CAPITAL AFFAIRS SAPI DE CV SOFOM ENR recibe las consultas, reclamaciones o aclaraciones, en su Unidad Especializada de Atención a Usuarios, ubicada en
+    Bosque de Tejocotes 309, Bosques de las Lomas, Alcaldía Cuajimalpa de Morelos, CP 05120, CDMX y por correo electrónico a 
+    <a href="mailto:consulta@capitalaffairs.mx">consulta@capitalaffairs.mx</a> o teléfono 55 25 59 94 36, así como sus oficinas.
+    En el caso de no obtener una respuesta satisfactoria o para cualquier duda podrá acudir a CONDUSEF 
+    <a href="https://www.condusef.gob.mx" target="_blank">www.condusef.gob.mx</a>, teléfono 55 53 40 09 99.
+  </p>
+  <p>
+    Para cualquier consulta, aclaración, inconformidad, reclamación o queja que se relacione con el crédito, el cliente contará con un periodo de 90 días naturales, contados a partir de la fecha en que tenga conocimiento del acto u omisión que la motive.
+  </p>
+
+  <p style="font-weight: bold;">COMISIÓN NACIONAL PARA LA PROTECCIÓN Y DEFENSA DE LOS USUARIOS DE SERVICIOS FINANCIEROS (CONDUSEF)</p>
+  <p>
+    En caso de dudas, quejas, reclamaciones o consultar información sobre las comisiones para fines informativos y de comparación, podrá acudir a la CONDUSEF, con domicilio en Insurgentes Sur No. 762, Colonia Del Valle, Benito Juárez, Código Postal 03100, Ciudad de México, vía correo electrónico a 
+    <a href="mailto:asesoria@condusef.gob.mx">asesoria@condusef.gob.mx</a>, comunicándose a los teléfonos 80 09 99 80 80 y 55 53 40 09 99, o consultar la página electrónica en Internet 
+    <a href="https://www.condusef.gob.mx" target="_blank">www.condusef.gob.mx</a>
+  </p>
+
+  <p style="font-weight: bold;">¡AVISO IMPORTANTE!</p>
+  <ul style="margin-top: 0; padding-left: 1em;">
+    <li>Incumplir tus obligaciones te puede generar comisiones o intereses moratorios.</li>
+    <li>Contratar créditos que excedan tu capacidad de pago afecta tu historial crediticio.</li>
+    <li>Realizar sólo el pago mínimo aumenta el tiempo de pago y el costo de la deuda, bajo el supuesto de que no efectúe consumos o compras adicionales.</li>
+  </ul>
+
+  <p style="font-size: 13px;">
+    *Cuando la fecha límite de pago corresponda a un día inhábil bancario, el pago podrá realizarse sin cargo adicional el siguiente día hábil bancario.<br>
+    **Monto base de cálculo de intereses
+  </p>
+
+  <p style="font-weight: bold;">SIGNIFICADO DE ABREVIATURAS:</p>
+  <ul style="margin-top: 0; padding-left: 1em;">
+    <li><strong>CAT:</strong> Costo Anual Total.</li>
+    <li><strong>CONDUSEF:</strong> Comisión Nacional para la Protección y Defensa de los Usuarios de Servicios Financieros.</li>
+    <li><strong>CP:</strong> Código Postal.</li>
+    <li><strong>IVA:</strong> Impuesto al Valor Agregado.</li>
+    <li><strong>RFC:</strong> Registro Federal de Contribuyentes.</li>
+    <li><strong>SOFOM:</strong> Sociedad Financiera de Objeto Múltiple.</li>
+    <li><strong>UNE:</strong> Unidad Especializada de Atención a Usuarios.</li>
+  </ul>
+
+  <p style="font-weight: bold; font-style: italic;">El presente estado de cuenta no sirve como Constancia para efectos fiscales.</p>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('graficaResumen').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Total Compras', 'Total Pagos'],
+        datasets: [{
+          label: 'Resumen Mensual',
+          data: [<%= resumen.totalCompras %>, <%= resumen.totalPagos %>],
+          backgroundColor: ['#f00', '#0a0']
+        }]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false
+      }
+    });
+  </script>
+</body>
+</html>
